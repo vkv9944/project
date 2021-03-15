@@ -1,7 +1,12 @@
 const mysql=require('mysql');
-
+const express=require("express");
 const jwt =require('jsonwebtoken');
 const bcrypt=require('bcryptjs');
+
+const upload =require('express-fileupload')
+
+//const app=express();
+//app.use(upload())
 
 const db=mysql.createConnection({
     host: process.env.DATABASE_HOST,
@@ -106,3 +111,36 @@ exports.login = async (req, res) => {
         
     }
 
+
+
+
+    //uploads
+
+    exports.upload = (req, res) => {
+
+        if(req.files){
+            console.log(req.files)
+            var file =req.files.file
+            var filename=file.name
+            console.log(filename)
+            console.log("hash value:"+file.md5)
+      
+      
+          
+          file.mv('./public/uploads/'+ filename,function(err){
+              if(err){
+                  res.send(err)
+              }else{
+                //  res.send("file uploaded"+"__"+file.md5);
+
+                     return res.render('user',{
+                          message:"file uploaded"+"__"+file.name+"__hash:"+file.md5
+                        })
+                   }
+              
+          })
+      
+        }
+
+
+    }

@@ -2,10 +2,12 @@ const express=require("express");
 const mysql=require("mysql");
 const dotenv=require('dotenv');
 const path=require('path');
+const upload =require('express-fileupload')
 
 dotenv.config({ path: './.env'});   
 
 const app=express();
+app.use(upload())
 
 const db=mysql.createConnection({
     host: process.env.DATABASE_HOST,
@@ -56,6 +58,7 @@ app.get("/register",(req,res)=>{
 
 app.use('/',require('./routes/pages'));
 app.use('/auth',require('./routes/auth'));
+
 
 
 app.listen(5006,()=>{
