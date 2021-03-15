@@ -2,16 +2,18 @@
 
 nav{
     background-color: #7ac4f5;
-    color:#fff
-    padding :30px 60px;
+    color:#fff;
+    padding:10px 30px;
     display:flex;
     justify-content:space-between;
+    opacity: 0.9;
+    
 }
 
 nav ul{
     display:flex;
     justify-content:space-around; 
-    align-items: center;
+    align-items:center;
 }
 
 nav li{
