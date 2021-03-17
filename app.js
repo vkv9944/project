@@ -3,6 +3,7 @@ const mysql=require("mysql");
 const dotenv=require('dotenv');
 const path=require('path');
 const upload =require('express-fileupload')
+const session = require('express-session') 
 
 dotenv.config({ path: './.env'});   
 
@@ -28,6 +29,25 @@ app.use(express.json());
 app.use(express.static(publicDirectory));
 
 app.set('view engine','hbs');
+
+
+app.use(session({ 
+  
+    // It holds the secret key for session 
+    secret: 'vivek12345', 
+  
+    // Forces the session to be saved 
+    // back to the session store 
+    resave: true, 
+  
+    // Forces a session that is "uninitialized" 
+    // to be saved to the store 
+    saveUninitialized: true
+})) 
+
+
+
+
 
 db.connect( (error) =>{
  if(error){

@@ -15,7 +15,10 @@ const db=mysql.createConnection({
     database: process.env.DATABASE
 })
 
+//var userid='null';
+
 const { request } = require("express");
+const e = require('express');
 
 exports.register=(req,res)=>{
 
@@ -58,6 +61,7 @@ db.query('SELECT email from users WHERE email = ?',[email],async (error,results)
         console.log(results);
         return res.render('register',{
          message:'user registered'
+         
         });
     }
 
@@ -72,6 +76,8 @@ db.query('SELECT email from users WHERE email = ?',[email],async (error,results)
 
 
 exports.login = async (req, res) => {
+
+    req.session.name = 'user_login'
 
     try {
     const {email, password}=req.body;
@@ -92,7 +98,12 @@ exports.login = async (req, res) => {
          })
         }else{
             //res.send("form submitted");
-            res.render('user');
+            req.session.uid = email;
+            //userid=email;
+            res.render('user',{
+                user:email,
+                message:'successfull login'
+            });
 
 
         }
@@ -118,7 +129,10 @@ exports.login = async (req, res) => {
 
     exports.upload = (req, res) => {
 
+        var usr=req.session.uid;
         if(req.files){
+
+
             console.log(req.files)
             var file =req.files.file
             var filename=file.name
@@ -126,21 +140,92 @@ exports.login = async (req, res) => {
             console.log("hash value:"+file.md5)
       
       
-          
-          file.mv('./public/uploads/'+ filename,function(err){
-              if(err){
-                  res.send(err)
-              }else{
-                //  res.send("file uploaded"+"__"+file.md5);
+            db.query('SELECT fhash from fdb WHERE  user=? AND fhash = ? ',[usr,file.md5],async (error,results)=>{
 
-                     return res.render('user',{
-                          message:"file uploaded"+"__"+file.name+"__hash:"+file.md5
-                        })
-                   }
-              
-          })
+                if(error){
+                    console.log(error);
+                }
+                if(results.length > 0) {
+                    return res.render('user',{
+                        message:'File already exist'
+                       });
+                }  else{
+                    
+
+                    file.mv('./public/uploads/'+ filename,function(err){
+                        if(err){
+                            res.send(err)
+                        }else{
+                          //  res.send("file uploaded"+"__"+file.md5);
+
+                   
+                             var uid=req.session.uid;
+                          db.query('INSERT INTO fdb SET ?',{user:uid,fname:file.name, fhash:file.md5},(error, results)=>{
+
+                            if(error){
+                                console.log(error);
+                            }else{
+                                return res.render('user',{
+                                    user:uid,
+                                    message:"file uploaded"+"__"+file.name+"__hash:"+file.md5
+                                  })
+                            }
+                        
+                          })
+
+                             }
+                        
+                    })
+
+
+                }
+
+            })
+
+    
+          
+         
       
         }
+
+
+    }
+
+
+    exports.view_file= (req,res)=>{
+
+        var uid=req.session.uid;
+
+       //res.send('<h1>view file</br> login id</h1>'+req.session.uid)
+
+    //    var query='select * from fdb';
+      
+    //    db.query(query, function(err, row, fields){
+    //      if(err) throw err;
+        
+    //     // res.json(rows);
+
+    //     res.render('file_view',{ title:'files',files:rows})
+    //    });
+
+       db.query('SELECT * from fdb WHERE user = ?',[uid],async (error,results)=>{
+
+        if(error){
+            console.log(error);
+        }else{
+            if(results.length > 0) {
+               
+                res.render('file_view',{ title:'files_list',files:results})
+
+            }  else{
+                res.render('file_view',{ title:'No file uploaded',files:results})
+            }
+
+          
+        }
+
+
+       })
 
 
     }

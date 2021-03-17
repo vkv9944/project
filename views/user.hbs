@@ -21,7 +21,7 @@
         <ul>
             <li><a href="/">Home</a></li>
             <li><a href="/view_file">View Files</a></li>
-            <li><a href="/login">Logout</a></li>
+            <li><a href="/logout">Logout</a></li>
         </ul>
     </nav>
 </div>
@@ -44,14 +44,14 @@
 
          <div class="d-grid gap-2"> </div>
   
-  
-{{#if success}}
-
-  <div class="alert alert-success">
-                              <strong>Success!</strong> {{success }}
-                            </div>
+{{#if user}}
+ 
+   <h4 class="alert alert-danger mt-4">user:{{user}}</h4>
 
   {{/if}}
+ 
+
+
 
 
  <div id="uploadfile" style="margin-top:50px" class="mainbox col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
