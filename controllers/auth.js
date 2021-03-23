@@ -3,7 +3,9 @@ const express=require("express");
 const jwt =require('jsonwebtoken');
 const bcrypt=require('bcryptjs');
 
-const upload =require('express-fileupload')
+const upload =require('express-fileupload');
+
+
 
 //const app=express();
 //app.use(upload())
@@ -138,7 +140,18 @@ exports.login = async (req, res) => {
             var filename=file.name
             console.log(filename)
             console.log("hash value:"+file.md5)
+
+
+//date
+var d = new Date();
+
+var tm=""+d.getHours()+":"+d.getMinutes()+"."+d.getSeconds();
+var tdate="_"+d.getDate()+"."+d.getMonth()+"."+d.getFullYear();
+var fnm=tdate+","+tm+"";
+
+
       
+            var fname=filename+"_"+d.getSeconds();
       
             db.query('SELECT fhash from fdb WHERE  user=? AND fhash = ? ',[usr,file.md5],async (error,results)=>{
 
@@ -151,8 +164,9 @@ exports.login = async (req, res) => {
                        });
                 }  else{
                     
+                 //   var fname=filename+"_("+tdate+")";
 
-                    file.mv('./public/uploads/'+ filename,function(err){
+                    file.mv('./public/uploads/'+ fname,function(err){
                         if(err){
                             res.send(err)
                         }else{
@@ -160,14 +174,14 @@ exports.login = async (req, res) => {
 
                    
                              var uid=req.session.uid;
-                          db.query('INSERT INTO fdb SET ?',{user:uid,fname:file.name, fhash:file.md5},(error, results)=>{
+                          db.query('INSERT INTO fdb SET ?',{user:uid,fname:fname, fhash:file.md5},(error, results)=>{
 
                             if(error){
                                 console.log(error);
                             }else{
                                 return res.render('user',{
                                     user:uid,
-                                    message:"file uploaded"+"__"+file.name+"__hash:"+file.md5
+                                    message:"file uploaded"+"__"+fname+"_hash:"+file.md5
                                   })
                             }
                         
@@ -196,17 +210,6 @@ exports.login = async (req, res) => {
 
         var uid=req.session.uid;
 
-       //res.send('<h1>view file</br> login id</h1>'+req.session.uid)
-
-    //    var query='select * from fdb';
-      
-    //    db.query(query, function(err, row, fields){
-    //      if(err) throw err;
-        
-    //     // res.json(rows);
-
-    //     res.render('file_view',{ title:'files',files:rows})
-    //    });
 
        db.query('SELECT * from fdb WHERE user = ?',[uid],async (error,results)=>{
 

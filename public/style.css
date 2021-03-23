@@ -35,7 +35,8 @@ text-decoration: none;
 #b1{
     background-color: rgb(236, 229, 220);
     background-image: url("/images/b11.gif");
-      background-repeat: no-repeat; background-position: center;
+      background-repeat: no-repeat; 
+      background-position: center;
     
       background-size: cover;
     }
