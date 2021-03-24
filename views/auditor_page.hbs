@@ -14,14 +14,16 @@
 </div>
 <div>
     <nav>
-        <h4>User Uploaded File List</h4>
+        <h4>Auditing Pending Requests</h4>
         <ul>
             <li><a href="/">Home</a></li>
-           
-            <li><a href="/logout">Logout</a></li>
+           <li><a href="/audit_list">Auditing list</a></li>
+            <li><a href="/alogout">Logout</a></li>
         </ul>
     </nav>
 </div>
+
+
 
 
 <div class="container">
@@ -32,7 +34,8 @@
  <tr>
 <th>User</th>
 <th>File_Name</th>
-<th>File_Hash</th>
+<th>Status</th>
+<th>Date</th>
 
  </tr>
 
@@ -41,7 +44,8 @@
  <tr>
 <th>{{this.user}}</th>
 <th>{{this.fname}}</th>
-<th>{{this.fhash}}</th>
+<th>{{this.status}}</th>
+<th>{{this.date}}</th>
 
  </tr>
 
@@ -53,10 +57,10 @@
 </div>
 
 
-    <form action="/auth/req_audit" method="POST">
+    <form action="/auth/req_hash" method="POST">
     
 <div class="row g-3">
-    <h4>Request for audit</h4>
+    <h4>Request hash to csp</h4>
   <div class="col-md-2">
     <label  class="form-label">Select File</label><br>
   </div>

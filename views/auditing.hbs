@@ -14,65 +14,28 @@
 </div>
 <div>
     <nav>
-        <h4>User Uploaded File List</h4>
+        <h4>Auditing Requests</h4>
         <ul>
             <li><a href="/">Home</a></li>
-           
-            <li><a href="/logout">Logout</a></li>
+           <li><a href="/audit_list">Auditing list</a></li>
+            <li><a href="/alogout">Logout</a></li>
         </ul>
     </nav>
 </div>
 
 
+
+
 <div class="container">
-
-<h1>{{title}}</h1>
-
-<table class="table">
- <tr>
-<th>User</th>
-<th>File_Name</th>
-<th>File_Hash</th>
-
- </tr>
-
- {{#each files}}
-
- <tr>
-<th>{{this.user}}</th>
-<th>{{this.fname}}</th>
-<th>{{this.fhash}}</th>
-
- </tr>
-
- {{/each}}
-
-</table>
+<h1>File hash from CSP:{{fhash}}</h1>
+<h1>File Hash Stored in db:{{fhash_db}}</h1>
+<h3>Result:{{result}}</h3>
 
 
 </div>
 
 
-    <form action="/auth/req_audit" method="POST">
     
-<div class="row g-3">
-    <h4>Request for audit</h4>
-  <div class="col-md-2">
-    <label  class="form-label">Select File</label><br>
-  </div>
-  <div class="col-md-4">
-   <select name="file_name" id="file_name">
-               {{#each files}}
-                <option value={{this.fname}}>{{this.fname}}</option>
-                {{/each}}
-        </select>
-  </div>
-  <div class="col-12">
-    <button type="submit" class="btn btn-primary">Send</button>
-  </div>
-</div>
-
-</form>
 
 
 {{#if message}}

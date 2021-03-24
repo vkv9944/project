@@ -2,6 +2,12 @@ const mysql=require('mysql');
 const express=require("express");
 const jwt =require('jsonwebtoken');
 const bcrypt=require('bcryptjs');
+var JSAlert = require("js-alert");
+
+var fs = require('fs');
+var crypto = require('crypto');
+//var hash = require('object-hash');
+var md5 = require('md5');
 
 const upload =require('express-fileupload');
 
@@ -18,6 +24,10 @@ const db=mysql.createConnection({
 })
 
 //var userid='null';
+
+var upload_files;
+var audit_request;
+var f;
 
 const { request } = require("express");
 const e = require('express');
@@ -76,7 +86,7 @@ db.query('SELECT email from users WHERE email = ?',[email],async (error,results)
 }
 
 
-
+// user login
 exports.login = async (req, res) => {
 
     req.session.name = 'user_login'
@@ -142,16 +152,20 @@ exports.login = async (req, res) => {
             console.log("hash value:"+file.md5)
 
 
+
+            
+
+
 //date
 var d = new Date();
-
 var tm=""+d.getHours()+":"+d.getMinutes()+"."+d.getSeconds();
-var tdate="_"+d.getDate()+"."+d.getMonth()+"."+d.getFullYear();
-var fnm=tdate+","+tm+"";
+var tdate=""+d.getDate()+"."+d.getMonth()+"."+d.getFullYear();
+
 
 
       
-            var fname=filename+"_"+d.getSeconds();
+            var fname=d.getSeconds()+"_"+filename;
+            
       
             db.query('SELECT fhash from fdb WHERE  user=? AND fhash = ? ',[usr,file.md5],async (error,results)=>{
 
@@ -174,7 +188,7 @@ var fnm=tdate+","+tm+"";
 
                    
                              var uid=req.session.uid;
-                          db.query('INSERT INTO fdb SET ?',{user:uid,fname:fname, fhash:file.md5},(error, results)=>{
+                          db.query('INSERT INTO fdb SET ?',{user:uid,fname:fname, fhash:file.md5,date:tdate},(error, results)=>{
 
                             if(error){
                                 console.log(error);
@@ -205,7 +219,7 @@ var fnm=tdate+","+tm+"";
 
     }
 
-
+// view file
     exports.view_file= (req,res)=>{
 
         var uid=req.session.uid;
@@ -217,18 +231,190 @@ var fnm=tdate+","+tm+"";
             console.log(error);
         }else{
             if(results.length > 0) {
-               
+                upload_files=results;
                 res.render('file_view',{ title:'files_list',files:results})
 
             }  else{
                 res.render('file_view',{ title:'No file uploaded',files:results})
-            }
-
-          
+            } 
         }
-
-
        })
 
 
     }
+
+    /// auditing pending request
+
+    exports.req_audit=(req,res)=>{
+
+        var uid=req.session.uid;
+        const file_name=req.body.file_name;
+   
+
+        var d = new Date();
+        var tdate=""+d.getDate()+"."+d.getMonth()+"."+d.getFullYear();
+       
+        
+
+        db.query('INSERT INTO audit_request SET ?',{user:uid,fname:file_name, status:'requested',date:tdate},(error, results)=>{
+
+            if(error){
+                console.log(error);
+            }else{
+  
+                return res.render('file_view',{
+                    user:uid,
+                    message:"request send for audit",
+                    files:upload_files
+                  })
+              
+            }
+        
+          })
+
+    }
+
+
+    // auditor login
+
+    exports.alogin = async (req, res) => {
+
+        req.session.name = 'auditor_login'
+       
+    
+        try {
+        const {userid, password}=req.body;
+        req.session.a_uid = userid;
+        if(!userid || !password){
+            
+            return res.render('auditor_login',{
+                message:'please provide valid userid and password'
+            })
+        }
+    
+        db.query('SELECT *FROM auditor WHERE userid=?',[userid], async(error,results)=>{
+            console.log(results);
+            if(!results || !(password==results[0].password)){
+              
+             res.status(401).render('auditor_login',{
+                 message:'userid or password is incorrect'
+             })
+            }else{
+             
+                db.query('SELECT * from audit_request WHERE status = ?',['requested'],async (error,results)=>{
+
+                    if(error){
+                        console.log(error);
+                    }else{
+                        if(results.length > 0) {
+                            audit_request=results;
+                            res.render('auditor_page',{ title:'audit_list', user:userid,files:results})
+            
+                        }  else{
+                            res.render('auditor_page',{ title:'No pending request', user:userid,files:results})
+                        } 
+                    }
+                   })
+    
+                }
+              })
+    
+       
+         } catch (error) {
+            console.log(error);
+            
+        }
+        
+            
+        }
+
+
+
+
+    /// request hash to csp
+
+     exports.req_hash= async(req,res)=>{
+
+            var fname=req.body.file_name;
+
+            var fpath="./public/uploads/"+fname;
+            console.log(fpath);
+
+            var fhash;
+            var fhash_db;
+            var result;
+
+
+fs.readFile(fpath, function(err, buf) {
+    
+    //fhash=md5(buf);
+    console.log(fhash=md5(buf));
+  });
+
+
+  db.query('SELECT fhash from fdb WHERE fname = ?',[fname],async (error,results)=>{
+
+    if(error){
+        console.log(error);
+    }else{
+        if(results.length > 0) {
+            fhash_db=results[0].fhash;
+            
+            if(fhash==fhash_db)
+            {
+                result='auditing done(data safe(not changed))';
+            }
+            else{
+                result='auditing done(data unsafe(tempered))';
+            }
+
+
+           
+            db.query('UPDATE audit_request SET status="done" WHERE fname = ?',[fname],async (error,results)=>{
+
+                if(error){
+                    console.log(error);
+                }else{
+                     console.log("auditing updated");
+                     res.render('auditing',{ title:'audit_result', fhash:fhash,fhash_db:fhash_db,result:result})
+                }
+               })
+        
+           
+
+
+        }  else{
+            res.render('auditing',{ title:'No pending request', fhash:'0x',fhash_db:'0x'})
+        } 
+    }
+   })
+
+ }
+
+
+ //audit request all
+ exports.audit_list=(req,res)=>{
+
+    db.query('SELECT * from audit_request ',[],async (error,results)=>{
+
+        if(error){
+            console.log(error);
+        }else{
+            if(results.length > 0) {
+                audit_request=results;
+                res.render('audit_list',{ title:'audit_list', user:req.session.a_uid,files:results})
+
+            }  else{
+                res.render('audit_list',{ title:'No request', user:req.session.a_uid,files:results})
+            } 
+        }
+       })
+
+
+
+ }
+
+
+
+
+

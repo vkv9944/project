@@ -14,72 +14,55 @@
 </div>
 <div>
     <nav>
-        <h4>User Uploaded File List</h4>
+        <h4>Auditor Login </h4>
         <ul>
             <li><a href="/">Home</a></li>
            
-            <li><a href="/logout">Logout</a></li>
         </ul>
     </nav>
 </div>
+    <div class="container mt-4">
+        <div class="card" ">
+    <div class="card header">
+      Login
+    </div>
+  <div class="card-body">
 
+<form action="/auth/alogin" method="POST">
+  
 
-<div class="container">
-
-<h1>{{title}}</h1>
-
-<table class="table">
- <tr>
-<th>User</th>
-<th>File_Name</th>
-<th>File_Hash</th>
-
- </tr>
-
- {{#each files}}
-
- <tr>
-<th>{{this.user}}</th>
-<th>{{this.fname}}</th>
-<th>{{this.fhash}}</th>
-
- </tr>
-
- {{/each}}
-
-</table>
-
-
-</div>
-
-
-    <form action="/auth/req_audit" method="POST">
-    
-<div class="row g-3">
-    <h4>Request for audit</h4>
-  <div class="col-md-2">
-    <label  class="form-label">Select File</label><br>
+<div class="mb-3">
+    <label  class="form-label ">user id</label>
+    <input type="text" class="form-control" id="userid" name="userid" >
+   
   </div>
-  <div class="col-md-4">
-   <select name="file_name" id="file_name">
-               {{#each files}}
-                <option value={{this.fname}}>{{this.fname}}</option>
-                {{/each}}
-        </select>
-  </div>
-  <div class="col-12">
-    <button type="submit" class="btn btn-primary">Send</button>
-  </div>
-</div>
 
+  
+  
+<div class="mb-3">
+    <label for="password" class="form-label">Password</label>
+    <input type="password" class="form-control" id="password" name="password" >
+   
+  </div>
+
+
+
+  <button type="submit" class="btn btn-primary">Login</button>
 </form>
 
+    
+  </div>
+</div>
 
-{{#if message}}
+
+  {{#if message}}
 
    <h4 class="alert alert-danger mt-4">{{message}}</h4>
 
   {{/if}}
+
+    </div>
+
 
 
 
